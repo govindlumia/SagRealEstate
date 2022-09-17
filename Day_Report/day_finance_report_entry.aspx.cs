@@ -1,0 +1,83 @@
+﻿using System;
+using System.Data;
+using System.Configuration;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Net.Mail;
+using System.Data;
+
+public partial class day_finance_report : System.Web.UI.Page
+{
+    maincode obj_main = new maincode();
+    SqlDataReader objReader;
+    string value;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["user_id"] == null || Session["user_name"] == null)
+        {
+            Response.Redirect("~/admin_login.aspx");
+        }
+
+    if (!IsPostBack)
+    {
+        
+
+        objReader = obj_main.agentdetails_dd_select(1);
+        ddlagentname.DataSource = objReader;
+        ddlagentname.DataTextField = "agent_name";
+        ddlagentname.DataValueField = "agent_name";
+        ddlagentname.DataBind();
+        ddlagentname.Items.Insert(0, "Select Agent");
+        ddlagentname.Items[0].Value = "0";
+        ddlagentname.SelectedIndex = 0;
+        objReader.Close();
+
+        objReader = obj_main.Branch_select(1);
+        Ddlbranchname.DataSource = objReader;
+        Ddlbranchname.DataTextField = "Branch_Name";
+        Ddlbranchname.DataValueField = "Branch_Name";
+        Ddlbranchname.DataBind();
+        Ddlbranchname.Items.Insert(0, "Select Branch ");
+        Ddlbranchname.Items[0].Value = "0";
+        Ddlbranchname.SelectedIndex = 0;
+        objReader.Close();
+        // obj_main.agent_name = ddlagent.SelectedValue.ToString();
+        // obj_main.Branch_Name = Ddlbranchname.SelectedValue.ToString();
+
+        txtduedate.Text = DateTime.Today.ToShortDateString();
+
+        txtreminddate.Text = DateTime.Today.ToShortDateString();
+        
+
+
+    }
+    }
+   
+    protected void submit_Click1(object sender, ImageClickEventArgs e)
+    {
+        obj_main.amount = Txtamountdues.Text;
+        obj_main.Feedback = Txtclifeedback.Text;
+        obj_main.mobile_no = Txtclientmobile.Text;
+        obj_main.Customer_name = Txtclientname.Text;
+
+        obj_main.nxt_remind_date = Convert.ToDateTime(txtreminddate.Text);
+        obj_main.due_date = Convert.ToDateTime(txtduedate.Text);
+
+        obj_main.Branch_Name = Ddlbranchname.SelectedValue.ToString();
+        obj_main.agent_name = ddlagentname.SelectedValue.ToString();
+        obj_main.created_by = Session["user_id"].ToString();
+
+
+        value = obj_main.dfr_detail_insert(obj_main);
+
+        Response.Redirect("~/Day_Report/day_finance_report.aspx");
+    }
+}
